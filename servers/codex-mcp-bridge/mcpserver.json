@@ -1,0 +1,44 @@
+{
+  "name": "codex-mcp-bridge",
+  "displayName": "Codex Bridge",
+  "description": "Conservative MCP bridge for local Codex CLI experiments. ask_codex is disabled by default.",
+  "version": "0.1.0",
+  "transport": "streamable-http",
+  "host": "127.0.0.1",
+  "port": 8001,
+  "command": "python",
+  "args": ["server.py"],
+  "cwd": ".",
+  "env": {
+    "CODEX_BRIDGE_ALLOWED_DIRS": "E:\\McpServer",
+    "CODEX_BRIDGE_HOST": "127.0.0.1",
+    "CODEX_BRIDGE_PORT": "8001",
+    "CODEX_BRIDGE_TIMEOUT": "300",
+    "CODEX_BRIDGE_ENABLE_ASK": "0",
+    "CODEX_BRIDGE_MAX_DEPTH": "1"
+  },
+  "healthcheck": {
+    "type": "tcp",
+    "host": "127.0.0.1",
+    "port": 8001,
+    "timeoutSec": 5,
+    "intervalSec": 10
+  },
+  "autostart": false,
+  "restartPolicy": {
+    "mode": "never",
+    "maxRetries": 0,
+    "backoffSec": 0
+  },
+  "logging": {
+    "stdout": "logs\\stdout.log",
+    "stderr": "logs\\stderr.log",
+    "rotateMB": 10
+  },
+  "security": {
+    "maxDepth": 1,
+    "askEnabledByDefault": false,
+    "bindLocalhostOnly": true
+  },
+  "tags": ["bridge", "codex", "experimental"]
+}

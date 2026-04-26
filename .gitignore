@@ -1,0 +1,26 @@
+# Build outputs
+**/bin/
+**/obj/
+**/dist/
+
+# Runtime logs
+**/logs/*.log
+**/*.log
+
+# Local runtime state
+*.tmp
+*.bak
+*.disabled
+
+# Python cache
+**/__pycache__/
+*.py[cod]
+
+# IDE/user files
+.vs/
+.idea/
+*.user
+*.suo
+
+# Keep intentional placeholders
+!**/logs/.keep

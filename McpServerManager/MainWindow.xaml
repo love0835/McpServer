@@ -1,0 +1,98 @@
+<Window x:Class="McpServerManager.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MCP Server Manager" Height="720" Width="1120"
+        MinHeight="620" MinWidth="980">
+    <DockPanel Background="#F5F7FA">
+        <Border DockPanel.Dock="Top" Background="#17212B" Padding="14,10">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Left">
+                    <TextBlock x:Name="AppTitleText" Text="MCP Server Manager" Foreground="White" FontSize="20" FontWeight="SemiBold"/>
+                    <TextBlock x:Name="ServerRootText" Foreground="#B8C2CC" FontSize="12"/>
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <ComboBox x:Name="LanguageBox"
+                              Width="112"
+                              Margin="6,0"
+                              SelectedValuePath="Tag"
+                              SelectionChanged="LanguageBox_SelectionChanged">
+                        <ComboBoxItem Content="繁體中文" Tag="zh-TW"/>
+                        <ComboBoxItem Content="English" Tag="en-US"/>
+                    </ComboBox>
+                    <Button x:Name="ReloadButton" Content="重新載入" Width="86" Margin="6,0" Click="Reload_Click"/>
+                    <Button x:Name="StartAllButton" Content="全部啟動" Width="86" Margin="6,0" Click="StartAll_Click"/>
+                    <Button x:Name="StopAllButton" Content="全部停止" Width="86" Margin="6,0" Click="StopAll_Click"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <Grid Margin="14">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="14"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Background="White" BorderBrush="#D7DEE8" BorderThickness="1">
+                <DataGrid x:Name="ServerGrid"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          SelectionMode="Single"
+                          SelectionChanged="ServerGrid_SelectionChanged"
+                          ItemsSource="{Binding Servers}"
+                          HeadersVisibility="Column"
+                          GridLinesVisibility="Horizontal">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn x:Name="NameColumn" Header="名稱" Binding="{Binding DisplayName}" Width="170"/>
+                        <DataGridTextColumn x:Name="StatusColumn" Header="狀態" Binding="{Binding StatusDisplay}" Width="110"/>
+                        <DataGridTextColumn x:Name="HealthColumn" Header="健康狀態" Binding="{Binding HealthDisplay}" Width="110"/>
+                        <DataGridTextColumn x:Name="PidColumn" Header="PID" Binding="{Binding Pid}" Width="80"/>
+                        <DataGridTextColumn x:Name="PortColumn" Header="Port" Binding="{Binding Port}" Width="70"/>
+                        <DataGridTextColumn x:Name="UptimeColumn" Header="運行時間" Binding="{Binding UptimeText}" Width="110"/>
+                        <DataGridTextColumn x:Name="ManifestColumn" Header="Manifest" Binding="{Binding ManifestPath}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
+            <Border Grid.Column="2" Background="White" BorderBrush="#D7DEE8" BorderThickness="1" Padding="12">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top">
+                        <TextBlock x:Name="SelectedTitle" Text="未選取伺服器" FontSize="18" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="SelectedDescription" Foreground="#5D6B7A" Margin="0,4,0,12" TextWrapping="Wrap"/>
+                        <UniformGrid Columns="3" Margin="0,0,0,10">
+                            <Button x:Name="StartButton" Content="啟動" Margin="0,0,6,0" Click="Start_Click"/>
+                            <Button x:Name="StopButton" Content="停止" Margin="3,0" Click="Stop_Click"/>
+                            <Button x:Name="RestartButton" Content="重新啟動" Margin="6,0,0,0" Click="Restart_Click"/>
+                        </UniformGrid>
+                        <UniformGrid Columns="3" Margin="0,0,0,12">
+                            <Button x:Name="OpenFolderButton" Content="開啟資料夾" Margin="0,0,6,0" Click="OpenFolder_Click"/>
+                            <Button x:Name="OpenLogsButton" Content="開啟日誌" Margin="3,0" Click="OpenLogs_Click"/>
+                            <Button x:Name="RefreshLogButton" Content="重新整理日誌" Margin="6,0,0,0" Click="RefreshLog_Click"/>
+                        </UniformGrid>
+                        <CheckBox x:Name="AutostartBox"
+                                  Content="由 Manager 自動啟動"
+                                  Margin="0,0,0,12"
+                                  Checked="AutostartBox_Changed"
+                                  Unchecked="AutostartBox_Changed"/>
+                    </StackPanel>
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock x:Name="LogTailLabel" Text="日誌尾端" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                        <TextBox x:Name="LogTailBox"
+                                 Grid.Row="1"
+                                 FontFamily="Consolas"
+                                 FontSize="12"
+                                 IsReadOnly="True"
+                                 TextWrapping="NoWrap"
+                                 VerticalScrollBarVisibility="Auto"
+                                 HorizontalScrollBarVisibility="Auto"/>
+                    </Grid>
+                </DockPanel>
+            </Border>
+        </Grid>
+    </DockPanel>
+</Window>

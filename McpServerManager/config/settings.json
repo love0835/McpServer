@@ -1,0 +1,7 @@
+{
+  "serverRoot": "E:\\McpServer\\servers",
+  "autostartOnLaunch": true,
+  "healthIntervalSec": 10,
+  "logTailLines": 200,
+  "language": "zh-TW"
+}

@@ -1,0 +1,37 @@
+{
+  "name": "claude-bridge",
+  "displayName": "Claude Bridge",
+  "description": "Exposes Claude Code CLI to MCP clients through streamable HTTP.",
+  "version": "1.0.0",
+  "transport": "streamable-http",
+  "host": "127.0.0.1",
+  "port": 8000,
+  "command": "python",
+  "args": ["server.py"],
+  "cwd": ".",
+  "env": {
+    "CLAUDE_BRIDGE_ALLOWED_DIRS": "E:\\TwStockAdvisor",
+    "CLAUDE_BRIDGE_HOST": "127.0.0.1",
+    "CLAUDE_BRIDGE_PORT": "8000",
+    "CLAUDE_BRIDGE_TIMEOUT": "600"
+  },
+  "healthcheck": {
+    "type": "tcp",
+    "host": "127.0.0.1",
+    "port": 8000,
+    "timeoutSec": 5,
+    "intervalSec": 10
+  },
+  "autostart": true,
+  "restartPolicy": {
+    "mode": "on-failure",
+    "maxRetries": 3,
+    "backoffSec": 3
+  },
+  "logging": {
+    "stdout": "logs\\stdout.log",
+    "stderr": "logs\\stderr.log",
+    "rotateMB": 10
+  },
+  "tags": ["bridge", "claude", "local"]
+}

@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="config\settings.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="rules\**\*" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="skills\**\*" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="logs\.keep" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>
