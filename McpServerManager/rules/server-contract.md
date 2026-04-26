@@ -32,6 +32,21 @@ include `mcpserver.json` in its root.
 - Paths may use `${MCP_ROOT}`, `${MANAGER_DIR}`, `${SERVER_ROOT}`, and `${SERVER_DIR}`.
 - Generated tools belong under `${MCP_ROOT}\tools` and must not be committed.
 
+## Large text and long-running calls
+
+- Do not pass user prompts, file contents, transcripts, generated documents, or other large text through command-line arguments.
+- Prefer stdin, temporary files under a bridge-owned state directory, or structured attachments for large payloads.
+- Any tool that may call an LLM, agent CLI, compiler, browser, or slow external process should have a background job API:
+  - `*_attach_prompt` or equivalent for large input chunks.
+  - `submit_*_job` that returns a `job_id` immediately.
+  - `get_*_job` with bounded `wait_ms`, cursors, and output chunk limits.
+  - `cancel_*_job` for running jobs.
+  - `list_*_jobs` for diagnostics.
+- Synchronous tools should remain for short diagnostics only and must document the async alternative.
+- Job state must live under `${SERVER_DIR}\state` or another Manager-resolved state directory and must be ignored by git.
+- Output reads must be chunked and cursor-based. Do not return unbounded stdout, stderr, logs, or generated text in one MCP response.
+- Log/audit command lines must redact or replace prompt payloads with markers such as `<stdin>` or `<attachment>`.
+
 ## Conservative bridge rules
 
 - Agent bridges should have isolated config, logs, allowed directories, and timeouts.
