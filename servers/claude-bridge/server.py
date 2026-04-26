@@ -145,14 +145,15 @@ def _read_chunk(path: Path, cursor: int, max_bytes: int) -> tuple[str, int, bool
     return data.decode("utf-8", errors="replace"), next_cursor, next_cursor < size
 
 
-def _claude_cmd(prompt: str, resume_last: bool) -> list[str]:
+def _claude_cmd(resume_last: bool) -> list[str]:
     cmd = [
         CLAUDE_EXE,
         "-p",
-        prompt,
         "--model",
         "claude-opus-4-7",
         "--output-format",
+        "text",
+        "--input-format",
         "text",
     ]
     if resume_last:
@@ -172,11 +173,12 @@ def ask_claude(prompt: str, working_dir: str | None = None, resume_last: bool = 
     if len(prompt.encode("utf-8")) > MAX_PROMPT_BYTES:
         return f"prompt is too large: max {MAX_PROMPT_BYTES} bytes"
 
-    cmd = _claude_cmd(prompt, resume_last)
+    cmd = _claude_cmd(resume_last)
     try:
         result = subprocess.run(
             cmd,
             cwd=safe,
+            input=prompt,
             capture_output=True,
             text=True,
             encoding="utf-8",
@@ -315,18 +317,21 @@ def _run_job(job_id: str) -> None:
     process: subprocess.Popen[str] | None = None
     try:
         job_dir = _job_dir(job_id)
-        prompt = (job_dir / "prompt.md").read_text(encoding="utf-8")
-        cmd = _claude_cmd(prompt, bool(meta["resume_last"]))
+        prompt_path = job_dir / "prompt.md"
+        cmd = _claude_cmd(bool(meta["resume_last"]))
         meta["status"] = "running"
         meta["started_at"] = _now()
         _write_meta(job_id, meta)
 
-        with (job_dir / "stdout.log").open("w", encoding="utf-8", errors="replace") as out, (
-            job_dir / "stderr.log"
-        ).open("w", encoding="utf-8", errors="replace") as err:
+        with prompt_path.open("r", encoding="utf-8", errors="replace") as prompt_in, (
+            job_dir / "stdout.log"
+        ).open("w", encoding="utf-8", errors="replace") as out, (job_dir / "stderr.log").open(
+            "w", encoding="utf-8", errors="replace"
+        ) as err:
             process = subprocess.Popen(
                 cmd,
                 cwd=str(meta["working_dir"]),
+                stdin=prompt_in,
                 stdout=out,
                 stderr=err,
                 text=True,

@@ -23,10 +23,15 @@ import server  # noqa: E402
 
 class FakePopen:
     next_pid = 9000
+    last_cmd = []
+    last_stdin_name = ""
 
     def __init__(self, cmd, cwd=None, stdout=None, stderr=None, **kwargs):
         self.cmd = list(cmd)
         self.cwd = str(cwd)
+        self.stdin = kwargs.get("stdin")
+        FakePopen.last_cmd = self.cmd
+        FakePopen.last_stdin_name = getattr(self.stdin, "name", "")
         self.stdout = stdout
         self.stderr = stderr
         self.pid = FakePopen.next_pid
@@ -95,6 +100,8 @@ def main() -> int:
         check("stdout cursor advances", done["stdout_next_cursor"] > 0, done)
         check("stderr cursor advances", done["stderr_next_cursor"] > 0, done)
         check("stdout content returned", "fake stdout" in done["stdout_chunk"], done["stdout_chunk"])
+        check("prompt not passed as command argument", "large prompt body" not in FakePopen.last_cmd, FakePopen.last_cmd)
+        check("prompt passed through stdin", FakePopen.last_stdin_name.endswith("prompt.md"), FakePopen.last_stdin_name)
 
         listed = parse(server.list_claude_jobs())
         check("list includes job", any(row["job_id"] == job_id for row in listed), listed)
