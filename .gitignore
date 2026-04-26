@@ -3,6 +3,7 @@
 **/obj/
 **/dist/
 tools/
+**/temp/
 
 # Runtime logs
 **/logs/*.log

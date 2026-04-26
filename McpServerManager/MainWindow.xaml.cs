@@ -55,7 +55,7 @@ public partial class MainWindow : Window
     {
         AppLogger.Info($"Loading server manifests from {_vm.Settings.ServerRoot}.");
         _vm.Servers.Clear();
-        var root = new DirectoryInfo(_vm.Settings.ServerRoot);
+        var root = new DirectoryInfo(_vm.Settings.ExpandedServerRoot);
         if (!root.Exists)
         {
             root.Create();
@@ -102,12 +102,12 @@ public partial class MainWindow : Window
             return;
         }
 
-        var cwd = ResolvePath(server.ServerFolder, server.Manifest.Cwd ?? ".");
+        var cwd = ResolvePath(server.ServerFolder, server.Expand(server.Manifest.Cwd ?? "."));
         Directory.CreateDirectory(cwd);
 
         var startInfo = new ProcessStartInfo
         {
-            FileName = server.Manifest.Command,
+            FileName = server.Expand(server.Manifest.Command),
             WorkingDirectory = cwd,
             UseShellExecute = false,
             CreateNoWindow = true,
@@ -117,16 +117,16 @@ public partial class MainWindow : Window
 
         foreach (var arg in server.Manifest.Args)
         {
-            startInfo.ArgumentList.Add(arg);
+            startInfo.ArgumentList.Add(server.Expand(arg));
         }
 
         foreach (var item in server.Manifest.Env)
         {
-            startInfo.Environment[item.Key] = item.Value;
+            startInfo.Environment[item.Key] = server.Expand(item.Value);
         }
 
-        var stdout = ResolvePath(server.ServerFolder, server.Manifest.Logging?.Stdout ?? "logs\\stdout.log");
-        var stderr = ResolvePath(server.ServerFolder, server.Manifest.Logging?.Stderr ?? "logs\\stderr.log");
+        var stdout = ResolvePath(server.ServerFolder, server.Expand(server.Manifest.Logging?.Stdout ?? "logs\\stdout.log"));
+        var stderr = ResolvePath(server.ServerFolder, server.Expand(server.Manifest.Logging?.Stderr ?? "logs\\stderr.log"));
         Directory.CreateDirectory(Path.GetDirectoryName(stdout)!);
         Directory.CreateDirectory(Path.GetDirectoryName(stderr)!);
 
@@ -279,7 +279,7 @@ public partial class MainWindow : Window
             if (hc.Type == "tcp")
             {
                 using var client = new TcpClient();
-                var host = hc.Host ?? server.Manifest.Host ?? "127.0.0.1";
+                var host = server.Expand(hc.Host ?? server.Manifest.Host ?? "127.0.0.1");
                 var port = hc.Port ?? server.Manifest.Port ?? 0;
                 if (port <= 0)
                 {
@@ -291,14 +291,14 @@ public partial class MainWindow : Window
 
             if (hc.Type == "http")
             {
-                var response = await _http.GetAsync(hc.Url).WaitAsync(TimeSpan.FromSeconds(hc.TimeoutSec ?? 5));
+                var response = await _http.GetAsync(server.Expand(hc.Url ?? "")).WaitAsync(TimeSpan.FromSeconds(hc.TimeoutSec ?? 5));
                 return response.IsSuccessStatusCode;
             }
 
             if (hc.Type == "mcp")
             {
                 const string body = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"mcp-server-manager\",\"version\":\"1\"}}}";
-                using var req = new HttpRequestMessage(HttpMethod.Post, hc.Url);
+                using var req = new HttpRequestMessage(HttpMethod.Post, server.Expand(hc.Url ?? ""));
                 req.Headers.TryAddWithoutValidation("Accept", "application/json, text/event-stream");
                 req.Content = new StringContent(body, Encoding.UTF8, "application/json");
                 var response = await _http.SendAsync(req).WaitAsync(TimeSpan.FromSeconds(hc.TimeoutSec ?? 5));
@@ -551,7 +551,7 @@ public partial class MainWindow : Window
         UiText.Language = UiText.IsSupported(_vm.Settings.Language) ? _vm.Settings.Language : "zh-TW";
         Title = T("WindowTitle");
         AppTitleText.Text = T("WindowTitle");
-        ServerRootText.Text = $"{T("ServerRoot")}: {_vm.Settings.ServerRoot}";
+        ServerRootText.Text = $"{T("ServerRoot")}: {_vm.Settings.ExpandedServerRoot}";
 
         ReloadButton.Content = T("Reload");
         StartAllButton.Content = T("StartAll");
@@ -620,6 +620,8 @@ public sealed class ServerState : INotifyPropertyChanged
     public int? Port => Manifest.Port;
     public string StatusDisplay => UiText.TranslateStatus(Status);
     public string HealthDisplay => UiText.TranslateHealth(Health);
+
+    public string Expand(string value) => PathVariables.Expand(value, ServerFolder);
 
     public string Status
     {
@@ -708,11 +710,14 @@ public sealed class ServerState : INotifyPropertyChanged
 
 public sealed class ManagerSettings
 {
-    public string ServerRoot { get; set; } = @"E:\McpServer\servers";
+    public string ServerRoot { get; set; } = @"${MCP_ROOT}\servers";
     public bool AutostartOnLaunch { get; set; } = true;
     public int HealthIntervalSec { get; set; } = 10;
     public int LogTailLines { get; set; } = 200;
     public string Language { get; set; } = "zh-TW";
+
+    [JsonIgnore]
+    public string ExpandedServerRoot => PathVariables.Expand(ServerRoot, null);
 
     public static ManagerSettings Load()
     {
@@ -741,7 +746,44 @@ public sealed class ManagerSettings
         var path = Path.Combine(AppContext.BaseDirectory, "config", "settings.json");
         return Directory.Exists(Path.GetDirectoryName(path))
             ? path
-            : @"E:\McpServer\McpServerManager\config\settings.json";
+            : Path.Combine(PathVariables.ManagerDir, "config", "settings.json");
+    }
+}
+
+public static class PathVariables
+{
+    public static string ManagerDir => FindManagerDir();
+    public static string McpRoot => Directory.GetParent(ManagerDir)?.FullName ?? AppContext.BaseDirectory;
+    public static string ServerRoot => Path.Combine(McpRoot, "servers");
+
+    public static string Expand(string value, string? serverDir)
+    {
+        var result = value
+            .Replace("${MCP_ROOT}", McpRoot, StringComparison.OrdinalIgnoreCase)
+            .Replace("${MANAGER_DIR}", ManagerDir, StringComparison.OrdinalIgnoreCase)
+            .Replace("${SERVER_ROOT}", ServerRoot, StringComparison.OrdinalIgnoreCase);
+
+        if (serverDir is not null)
+        {
+            result = result.Replace("${SERVER_DIR}", serverDir, StringComparison.OrdinalIgnoreCase);
+        }
+
+        return Environment.ExpandEnvironmentVariables(result);
+    }
+
+    private static string FindManagerDir()
+    {
+        var baseDir = AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var current = new DirectoryInfo(baseDir);
+        while (current is not null)
+        {
+            if (string.Equals(current.Name, "McpServerManager", StringComparison.OrdinalIgnoreCase))
+            {
+                return current.FullName;
+            }
+            current = current.Parent;
+        }
+        return baseDir;
     }
 }
 

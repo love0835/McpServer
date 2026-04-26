@@ -1,5 +1,5 @@
 {
-  "serverRoot": "E:\\McpServer\\servers",
+  "serverRoot": "${MCP_ROOT}\\servers",
   "autostartOnLaunch": true,
   "healthIntervalSec": 10,
   "logTailLines": 200,

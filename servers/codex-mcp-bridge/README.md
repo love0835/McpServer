@@ -3,15 +3,16 @@
 This bridge is intentionally conservative.
 
 - `codex_version` is available for diagnostics.
-- `ask_codex` is enabled through `CODEX_BRIDGE_ENABLE_ASK=1`.
+- `ask_codex` is disabled by default. Enable it with `CODEX_BRIDGE_ENABLE_ASK=1` only after review.
 - `MCP_CALL_DEPTH` prevents nested Codex calls.
-- The default allowed directory is `E:\McpServer`.
+- The default allowed directory is the MCP workspace root.
 - When enabled, `ask_codex` uses `codex exec` with read-only sandboxing.
 
-The preferred local CLI path is:
+The bridge does not use `codex.cmd` or WindowsApps. It expects:
 
 ```text
-E:\McpServer\tools\npm-global\codex.cmd
+CODEX_NODE_EXE=${MCP_ROOT}\tools\node\node.exe
+CODEX_JS_ENTRY=${MCP_ROOT}\tools\codex-cli\node_modules\@openai\codex\bin\codex.js
 ```
 
 The WindowsApps app execution alias may return `Access is denied`; avoid using

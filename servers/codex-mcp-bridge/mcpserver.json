@@ -10,12 +10,13 @@
   "args": ["server.py"],
   "cwd": ".",
   "env": {
-    "CODEX_EXE": "E:\\McpServer\\tools\\npm-global\\codex.cmd",
-    "CODEX_BRIDGE_ALLOWED_DIRS": "E:\\McpServer",
+    "CODEX_NODE_EXE": "${MCP_ROOT}\\tools\\node\\node.exe",
+    "CODEX_JS_ENTRY": "${MCP_ROOT}\\tools\\codex-cli\\node_modules\\@openai\\codex\\bin\\codex.js",
+    "CODEX_BRIDGE_ALLOWED_DIRS": "${MCP_ROOT}",
     "CODEX_BRIDGE_HOST": "127.0.0.1",
     "CODEX_BRIDGE_PORT": "8001",
     "CODEX_BRIDGE_TIMEOUT": "300",
-    "CODEX_BRIDGE_ENABLE_ASK": "1",
+    "CODEX_BRIDGE_ENABLE_ASK": "0",
     "CODEX_BRIDGE_MAX_DEPTH": "1"
   },
   "healthcheck": {
@@ -38,7 +39,7 @@
   },
   "security": {
     "maxDepth": 1,
-    "askEnabledByDefault": true,
+    "askEnabledByDefault": false,
     "bindLocalhostOnly": true
   },
   "tags": ["bridge", "codex", "experimental"]

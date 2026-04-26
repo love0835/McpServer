@@ -29,6 +29,8 @@ include `mcpserver.json` in its root.
 - A server must tolerate being started and stopped by process control.
 - A server should expose a cheap health check.
 - Ports must be unique across managed HTTP/SSE servers.
+- Paths may use `${MCP_ROOT}`, `${MANAGER_DIR}`, `${SERVER_ROOT}`, and `${SERVER_DIR}`.
+- Generated tools belong under `${MCP_ROOT}\tools` and must not be committed.
 
 ## Conservative bridge rules
 
