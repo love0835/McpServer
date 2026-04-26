@@ -15,7 +15,7 @@ E:\McpServer\
 ## Components
 
 - `servers\claude-bridge`: Streamable HTTP MCP bridge for Claude Code CLI.
-- `servers\codex-mcp-bridge`: Conservative streamable HTTP MCP bridge scaffold for Codex CLI. `ask_codex` is disabled by default.
+- `servers\codex-mcp-bridge`: Conservative streamable HTTP MCP bridge for Codex CLI. It uses `codex exec` with read-only sandboxing.
 - `McpServerManager`: WPF manager app that scans `servers\**\mcpserver.json`, starts/stops servers, checks health, tails logs, and supports Traditional Chinese/English UI.
 
 ## Manager
@@ -51,4 +51,13 @@ Rules and schema live in:
 ```text
 McpServerManager\rules\
 McpServerManager\skills\add-mcp-server\
+```
+
+## Codex CLI Repair
+
+The WindowsApps Codex alias can fail from subprocesses with `Access is denied`.
+Use the local npm-based repair script:
+
+```powershell
+E:\McpServer\servers\codex-mcp-bridge\install-codex-cli.ps1
 ```

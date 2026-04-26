@@ -11,6 +11,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 if sys.stdout is None or sys.stderr is None:
@@ -132,8 +133,16 @@ def ask_codex(
     if not safe.is_dir():
         return f"錯誤：working_dir 不是目錄或不存在：{safe}"
 
-    # CLI syntax is intentionally configurable while the local install is being verified.
-    cmd = [CODEX_EXE]
+    output_file = Path(tempfile.gettempdir()) / f"codex-bridge-{os.getpid()}.txt"
+    cmd = [
+        CODEX_EXE,
+        "exec",
+        "--skip-git-repo-check",
+        "--sandbox",
+        "read-only",
+        "--output-last-message",
+        str(output_file),
+    ]
     if extra_args:
         cmd.extend(extra_args)
     cmd.append(prompt)
@@ -161,6 +170,13 @@ def ask_codex(
         return f"Codex 執行失敗：{e}"
 
     output = (result.stdout or "").strip()
+    if output_file.is_file():
+        try:
+            final_message = output_file.read_text(encoding="utf-8", errors="replace").strip()
+            if final_message:
+                output = final_message
+        except OSError:
+            pass
     if result.returncode != 0:
         err = (result.stderr or "").strip()
         return (
