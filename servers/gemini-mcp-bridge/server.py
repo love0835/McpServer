@@ -169,7 +169,7 @@ def _read_chunk(path: Path, cursor: int, max_bytes: int) -> tuple[str, int, bool
 def _gemini_headless_command(extra_args: list[str] | None = None) -> list[str]:
     cmd = _gemini_command(
         "--prompt",
-        "",
+        "Use the stdin content as the complete user request.",
         "--output-format",
         "text",
         "--approval-mode",
