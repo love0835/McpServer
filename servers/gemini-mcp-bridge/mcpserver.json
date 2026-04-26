@@ -1,0 +1,49 @@
+{
+  "name": "gemini-mcp-bridge",
+  "displayName": "Gemini Bridge",
+  "description": "Conservative MCP bridge for local Gemini CLI experiments. ask_gemini is disabled by default.",
+  "version": "0.1.0",
+  "transport": "streamable-http",
+  "host": "127.0.0.1",
+  "port": 8002,
+  "command": "python",
+  "args": ["server.py"],
+  "cwd": ".",
+  "env": {
+    "GEMINI_NODE_EXE": "${MCP_ROOT}\\tools\\node\\node.exe",
+    "GEMINI_JS_ENTRY": "${MCP_ROOT}\\tools\\gemini-cli\\node_modules\\@google\\gemini-cli\\bundle\\gemini.js",
+    "GEMINI_BRIDGE_ALLOWED_DIRS": "${MCP_ROOT}",
+    "GEMINI_BRIDGE_HOST": "127.0.0.1",
+    "GEMINI_BRIDGE_PORT": "8002",
+    "GEMINI_BRIDGE_TIMEOUT": "300",
+    "GEMINI_BRIDGE_ENABLE_ASK": "0",
+    "GEMINI_BRIDGE_STATE_DIR": "${SERVER_DIR}\\state",
+    "GEMINI_BRIDGE_MAX_PROMPT": "10485760",
+    "GEMINI_BRIDGE_MAX_CHUNK": "50000",
+    "GEMINI_BRIDGE_MAX_CONCURRENT": "1"
+  },
+  "healthcheck": {
+    "type": "tcp",
+    "host": "127.0.0.1",
+    "port": 8002,
+    "timeoutSec": 5,
+    "intervalSec": 10
+  },
+  "autostart": false,
+  "restartPolicy": {
+    "mode": "never",
+    "maxRetries": 0,
+    "backoffSec": 0
+  },
+  "logging": {
+    "stdout": "logs\\stdout.log",
+    "stderr": "logs\\stderr.log",
+    "rotateMB": 10
+  },
+  "security": {
+    "askEnabledByDefault": false,
+    "bindLocalhostOnly": true,
+    "approvalMode": "plan"
+  },
+  "tags": ["bridge", "gemini", "experimental"]
+}
