@@ -14,7 +14,7 @@ E:\McpServer\
 
 ## Components
 
-- `servers\claude-bridge`: Streamable HTTP MCP bridge for Claude Code CLI.
+- `servers\claude-bridge`: Streamable HTTP MCP bridge for Claude Code CLI. Short requests can use `ask_claude`; long requests should use the async job tools.
 - `servers\codex-mcp-bridge`: Conservative streamable HTTP MCP bridge for Codex CLI. It uses a project-local portable Node/Codex install and `codex exec` with read-only sandboxing.
 - `McpServerManager`: WPF manager app that scans `servers\**\mcpserver.json`, starts/stops servers, checks health, tails logs, and supports Traditional Chinese/English UI.
 - `scripts`: Setup and health scripts for portable tools.
@@ -82,3 +82,19 @@ ${MANAGER_DIR}
 ${SERVER_ROOT}
 ${SERVER_DIR}
 ```
+
+## Claude Bridge Job API
+
+Use the job API for long Claude Code requests so MCP clients do not wait on one
+long `tools/call`.
+
+```text
+bridge_attach_prompt(content, attachment_id?, append?) -> attachment_id
+submit_claude_job(prompt?, prompt_attachment?, working_dir?, resume_last?, timeout_secs?) -> job_id
+get_claude_job(job_id, wait_ms?, stdout_cursor?, stderr_cursor?, max_bytes?) -> status and chunks
+cancel_claude_job(job_id)
+list_claude_jobs(status?)
+```
+
+Bridge state is stored under the Claude bridge state directory, not inside user
+repositories.

@@ -13,7 +13,9 @@
     "CLAUDE_BRIDGE_ALLOWED_DIRS": "E:\\TwStockAdvisor",
     "CLAUDE_BRIDGE_HOST": "127.0.0.1",
     "CLAUDE_BRIDGE_PORT": "8000",
-    "CLAUDE_BRIDGE_TIMEOUT": "600"
+    "CLAUDE_BRIDGE_TIMEOUT": "600",
+    "CLAUDE_BRIDGE_STATE_DIR": "${SERVER_DIR}\\state",
+    "CLAUDE_BRIDGE_MAX_CONCURRENT": "2"
   },
   "healthcheck": {
     "type": "tcp",

@@ -4,6 +4,7 @@
 **/dist/
 tools/
 **/temp/
+**/state/
 
 # Runtime logs
 **/logs/*.log
